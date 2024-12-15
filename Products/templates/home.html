@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+
+    <!-- Bootstrap CDNS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <!-- Datatable CDNS -->
+    <!-- DataTables CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- DataTables JS -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+     
+     
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row d-flex justify-content-center">
+            <div class="col-lg-12">
+                {% if messages %}
+                <div class="alert {% for message in messages %}alert-{{ message.tags }} {% endfor %}"
+                        id="alert"
+                        role="alert">
+                    {% for message in messages %}
+                    <span style="display: flex; align-items: center;">{{ message|safe }} <i  class="bi bi-check2-all" style="font-size: 20px;"></i></span>
+                    {% endfor %}
+                </div>
+                <script>    
+                    setTimeout(function() {
+                        document.getElementById('alert').style.display = 'none';
+                    }, 3000);  
+                </script>    
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+
+                <div class="card">
+                    <div class="card-body">
+                            <form action="" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="text-center">
+                                    <h3>Add Products</h3>
+                                </div>
+        
+                                <div class="col-lg-12 mt-2">
+                                    <label for="" class="mb-2 form-label">Product Name <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter The product name" required>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <label for="" class="mb-2 form-label">Product Price <span style="color: red;">*</span></label>
+                                    <input type="number" class="form-control" name="price" id="price" placeholder="Enter The Product Price" required>
+                                </div>
+                                <div class="col-lg-12 mt-2">
+                                    <!-- <label for="" class="mb-2 form-label">Product Name <span style="color: red;">*</span></label> -->
+                                    <input type="checkbox" name="check" id="check"  placeholder="Enter The Product Price" > Status
+                                </div>
+                                <div class="col-lg-12 mt-3 d-flex justify-content-center gap-2">
+                                    <button class="btn btn-success" type="submit">Submit</button>
+                                    <button class="btn btn-secondary" type="reset">Cancel </button>
+                                </div>
+                            </form>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-12 mb-2">
+                <button  id="deleteBtn" class="btn btn-danger" disabled><i class="bi bi-trash"></i> Delete</button> 
+            </div>
+            <div class="col-lg-12">
+                <table id="example" class="table table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="mainCheckbox"></th>
+                            <th>S.No</th>
+                            <th>Product Name</th>
+                            <th>Product Price</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in products%}
+                        <tr>
+                            <td><input type="checkbox" class="productCheckbox" data-id="{{i.id}}"></td>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{i.product_name}}</td>
+                            <td>{{i.product_price}}</td>
+                            {% if i.product_status %}
+                            <td class=" text-center">
+                                <span class="badge text-bg-success">Active</span>
+                            </td>
+                            {% else %}
+                            <td class=" text-center">
+                                <span class="badge text-bg-danger">
+
+                                    Deactive    
+                                </span>
+                            </td>
+                            {% endif %}
+                            <td class="text-center">
+                                <button class="btn btn-primary text-center" data-bs-toggle="modal" data-bs-target="#updatemodal-{{i.id}}"><i class="bi bi-pencil-square"></i></button>
+                                <button class="btn btn-danger  text-center" data-bs-toggle="modal" data-bs-target="#deletemodal-{{i.id}}"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                        
+                        {% endfor %}
+                    </tbody>
+                    
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+{% for x in products %}
+<div class="modal fade" id="updatemodal-{{x.id}}" tabindex="-1" aria-labelledby="" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h1 class="modal-title fs-5 text-white" id="">Update Product</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{% url 'update' x.id %}" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+        <div class="modal-body">
+                
+
+                <div class="col-lg-12 mt-2">
+                    <label for="" class="mb-2 form-label">Product Name <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control" name="uname" id="uname" value="{{x.product_name}}" placeholder="Enter The product name" required>
+                </div>
+                <div class="col-lg-12 mt-2">
+                    <label for="" class="mb-2 form-label">Product Price <span style="color: red;">*</span></label>
+                    <input type="number" class="form-control" name="uprice" id="uprice" value="{{x.product_price}}" placeholder="Enter The Product Price" required>
+                </div>
+                
+                <div class="col-lg-12 mt-2">
+                    <!-- <label for="" class="mb-2 form-label">Product Name <span style="color: red;">*</span></label> -->
+                    {% if x.product_status %}
+                    <input type="checkbox" name="ucheck1" id="ucheck1"  checked> Status
+                    {% else %}
+                    <input type="checkbox" name="ucheck1" id="ucheck1"  > Status
+                    {% endif %}
+                </div>
+                
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary" name="update">Update</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+    </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% for x in products %}
+<div class="modal fade" id="deletemodal-{{x.id}}" tabindex="-1" aria-labelledby="" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white" >
+        <h1 class="modal-title fs-5 text-white" id="">Delete Product</h1>
+        <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are You Sure you want delete this product <b>"{{x.product_name}}"</b> ?</p>
+      </div>
+      <div class="modal-footer">
+          <a href="{% url 'deleteproduct' x.id %}" class="btn btn-danger" >Delete</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+
+
+<script>
+    $(document).ready(function () {
+    
+    $('#mainCheckbox').change(function () {
+        let isChecked = $(this).prop('checked');
+        $('.productCheckbox').prop('checked', isChecked);
+        toggleDeleteButton(); 
+    });
+
+    
+    $('.productCheckbox').change(function () {
+        updateMainCheckbox();  
+        toggleDeleteButton();  
+    });
+
+    
+    function toggleDeleteButton() {
+        let anyChecked = $('.productCheckbox:checked').length > 0;
+        $('#deleteBtn').prop('disabled', !anyChecked);
+    }
+
+    
+    function updateMainCheckbox() {
+        
+        let totalCheckboxes = $('.productCheckbox').length;
+        let checkedCheckboxes = $('.productCheckbox:checked').length;
+
+        if (totalCheckboxes === checkedCheckboxes) {
+            $('#mainCheckbox').prop('checked', true);  
+        } else {
+            $('#mainCheckbox').prop('checked', false);  
+        }
+    }
+
+    
+    $('#deleteBtn').click(function () {
+        let selectedIds = $('.productCheckbox:checked').map(function () {
+            return $(this).data('id');
+        }).get();
+
+        if (selectedIds.length > 0) {
+            
+            $.ajax({
+                url: '{% url "delete_products" %}',  
+                method: 'POST',
+                data: {
+                    'ids[]': selectedIds  
+                },
+                success: function(response) {
+                    location.reload();
+                },
+                error: function() {
+                    alert('Error deleting products');
+                }
+            });
+        }
+    });
+});
+
+    
+</script>
+
+
+   
+
+    <script>
+        $(document).ready(function() {
+          $('#example').DataTable(); // Initialize DataTable
+        });
+      </script>
+</body>
+</html>
